@@ -1,40 +1,57 @@
 # lab3
 
 ## 1. Установка minikube
-**1. Предварительно установим Docker Desktop**
-**2. Скачаем kubectl и minikube-installer**
-**3. Запустим minikube командой minikube start**
-![minikube start]('img/1.jpg')
-**4. Проверим наличие контейнера minikube**
+1. Предварительно установим Docker Desktop
+   
+2. Скачаем kubectl и minikube-installer
+3. Запустим minikube командой minikube start
+![]('lab3/img/1.jpg')
+
+4. Проверим наличие контейнера minikube
+   
 ![docker ps]('img/2.jpg')
-**5. Посмотрим конфиг кластера**
-![kubectl config view]('img/3.jpg')
+
+5. Посмотрим конфиг кластера
+![]('img/3.jpg')
 
 
 ## 2. Создаем объекты через CLI
-**1. Порогоним манифесты для создания объектов в кластере**
+1. Порогоним манифесты для создания объектов в кластере
+   
 ![kubectl get тип_ресурса]('img/4.jpg')
-**6. Проверим, что все сервисы создались**
+
+2. Проверим, что все сервисы создались
+
 ![kubectl get тип_ресурса]('img/5.jpg')
-**7. Создадим nextcloud**
+
+3. Создадим nextcloud
+
 Содержимое секрета скрыто
+
 ![kubectl get тип_ресурса]('img/6.jpg')
+
 ![kubectl get тип_ресурса]('img/7.jpg')
+
 ![kubectl get тип_ресурса]('img/10.jpg')
-**8. Посмотрим поды и логи**
+
+4. Посмотрим поды и логи
 ![kubectl get тип_ресурса]('img/8.jpg')
+
 ![kubectl get тип_ресурса]('img/9.jpg')
 
 ## 3. Подключаемся извне
-**9. Создадим сервис специальной командой и осуществим туннелирование трафика между нодой minikube и сервисом**
+1. Создадим сервис специальной командой и осуществим туннелирование трафика между нодой minikube и сервисом
+
 ![kubectl get тип_ресурса]('img/11.jpg')
+
 ![kubectl get тип_ресурса]('img/12.jpg')
 
-**10. Установим допкомпонент dashboard для minikube**
+2. Установим допкомпонент dashboard для minikube
+
 ![kubectl get тип_ресурса]('img/13.jpg')
 
 ##4. Модифицируем исходные манифесты
-**1. Создадим манифест ```pg_secret.yml``` и перенесем туда значения POSTGRES_USER и POSTGRES_PASSWORD**
+1. Создадим манифест ```pg_secret.yml``` и перенесем туда значения POSTGRES_USER и POSTGRES_PASSWORD
 ```
 apiVersion: v1
 kind: Secret
@@ -47,7 +64,7 @@ stringData:
   POSTGRES_USER: "postgres"
   POSTGRES_PASSWORD: "my_password"
 ```
-**2. Перенесем переменные nextcloud из деплоймента в конфигмап**
+2. Перенесем переменные nextcloud из деплоймента в конфигмап
 ```
 apiVersion: v1
 kind: ConfigMap
@@ -63,7 +80,7 @@ data:
   NEXTCLOUD_ADMIN_USER: "admin"
 ```
 
-**3. Добавим Liveness и Readiness пробы**
+3. Добавим Liveness и Readiness пробы
 ```
         livenessProbe:
           httpGet:
@@ -93,6 +110,7 @@ data:
 ## Ответы на вопросы
 
 1. Важен ли порядок выполнения манифестов kubernetes? Почему?
+   
 Да, порядок выполнения манифестов Kubernetes важен, но Kubernetes сам управляет некоторыми аспектами зависимостей. В нашем примере Deployment nextcloud имеет значения, описанные в ConfigMap и Secret манифестов pg_configmap.yml, pg_secret.yml.
 
 2. Что (и почему) произойдет, если отскейлить количество реплик postgres-deployment в 0, затем обратно в 1, после чего попробовать снова зайти на Nextcloud?
