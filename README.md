@@ -5,52 +5,53 @@
    
 2. Скачаем kubectl и minikube-installer
 3. Запустим minikube командой minikube start
-![]('lab3/img/1.jpg')
-
-4. Проверим наличие контейнера minikube
    
-![docker ps]('img/2.jpg')
+![a](lab3/img/1.jpg)
+
+5. Проверим наличие контейнера minikube
+   
+![docker ps](lab3/img/2.jpg)
 
 5. Посмотрим конфиг кластера
-![]('img/3.jpg')
+![](lab3/img/3.jpg)
 
 
 ## 2. Создаем объекты через CLI
 1. Порогоним манифесты для создания объектов в кластере
    
-![kubectl get тип_ресурса]('img/4.jpg')
+![kubectl get тип_ресурса](lab3/img/4.jpg)
 
 2. Проверим, что все сервисы создались
 
-![kubectl get тип_ресурса]('img/5.jpg')
+![kubectl get тип_ресурса](lab3/img/5.jpg)
 
 3. Создадим nextcloud
 
 Содержимое секрета скрыто
 
-![kubectl get тип_ресурса]('img/6.jpg')
+![kubectl get тип_ресурса](lab3/img/6.jpg)
 
-![kubectl get тип_ресурса]('img/7.jpg')
+![kubectl get тип_ресурса](lab3/img/7.jpg)
 
-![kubectl get тип_ресурса]('img/10.jpg')
+![kubectl get тип_ресурса](lab3/img/10.jpg)
 
 4. Посмотрим поды и логи
-![kubectl get тип_ресурса]('img/8.jpg')
+![kubectl get тип_ресурса](lab3/img/8.jpg)
 
-![kubectl get тип_ресурса]('img/9.jpg')
+![kubectl get тип_ресурса](lab3/img/9.jpg)
 
 ## 3. Подключаемся извне
 1. Создадим сервис специальной командой и осуществим туннелирование трафика между нодой minikube и сервисом
 
-![kubectl get тип_ресурса]('img/11.jpg')
+![kubectl get тип_ресурса](lab3/img/11.jpg)
 
-![kubectl get тип_ресурса]('img/12.jpg')
+![kubectl get тип_ресурса](lab3/img/12.jpg)
 
 2. Установим допкомпонент dashboard для minikube
 
-![kubectl get тип_ресурса]('img/13.jpg')
+![kubectl get тип_ресурса](lab3/img/13.jpg)
 
-##4. Модифицируем исходные манифесты
+## 4. Модифицируем исходные манифесты
 1. Создадим манифест ```pg_secret.yml``` и перенесем туда значения POSTGRES_USER и POSTGRES_PASSWORD
 ```
 apiVersion: v1
