@@ -1,0 +1,28 @@
+# Уточнили версию базового образа. 
+# Используем версию slim, так как занимает мало памяти
+FROM python:3.12-slim
+WORKDIR /app
+
+# Соединили команды RUN, чтобы не создавать лишних слоев, а также удалили всякие кэши через rm команду
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Сначала копируем requirements (а не весь проект) и устанавливаем зависимости.
+COPY ./requirements.txt .
+# Добавили флаг --no-cache-dir
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Копируем файлы проекта после установки зависимостей (вместе с .gitignore)
+COPY . .
+
+EXPOSE 5000
+
+VOLUME /app/data
+
+# Создание юзера с ограниченными правами
+RUN useradd -m -u 1000 appuser
+USER appuser
+
+# Best practice это писать запуск скрипта в ENTRYPOINT, а параметры в CMD
+ENTRYPOINT [ "python", "init_db.py"] 
