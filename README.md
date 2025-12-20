@@ -1,73 +1,68 @@
-# lab1:
+# lab4:
 
-## Измерение размеров двух образов
+# Развертывание сервиса на Kubernetes
 
-![alt text](image.png)
+Этот набор манифестов разворачивает Flask приложение с PostgreSQL базой данных на Kubernetes.
 
-## Как билдить
+## Структура
 
-Запускаем все команды из корневой папки проекта.
+- `configmap.yml` - ConfigMap с конфигурацией приложения
+- `secret.yml` - Secret с учетными данными PostgreSQL
+- `postgres-deployment.yml` - Deployment для PostgreSQL
+- `app-deployment.yml` - Deployment для Flask приложения (с кастомным образом)
+- `app-service.yml` - Service для Flask приложения
 
-Команда для хорошего докерфайла:
+## Развертывание
+
+### Ручное развертывание
+
+1. Убедимся, что Minikube запущен:
+```bash
+minikube status
+# Если не запущен:
+minikube start
 ```
-docker build -t container_app -f good_Dockerfile .
+2. Соберем Docker образ для приложения:
+```bash
+docker build -f init_db_Dockerfile -t container_app:init-latest .
+docker build -f good_Dockerfile -t container_app:latest .
 ```
 
-Команда для плохого докерфайла:
-```
-docker build -t bad_container_app -f bad_Dockerfile .
-```
-
-## Как запускать
-Команда для хорошего докерфайла (порт 8081 на хосте взят как пример, можете поставить свой):
-```
-docker run -v ./data/:/app/data -p 8081:5000 container_app
-```
-
-Команда для плохого докерфайла:
-```
-docker run -v ./data/:/app/data -p 8081:5000 bad_container_app
+4. Применим манифесты в правильном порядке:
+```bash
+cd lab4
+kubectl apply -f configmap.yml
+kubectl apply -f secret.yml
+kubectl apply -f postgres-deployment.yml
+kubectl apply -f app-deployment.yml
+kubectl apply -f app-service.yml
 ```
 
-## Плохие практики в bad.dockerfile
+5. Проверим статус подов:
+```bash
+kubectl get pods
+kubectl get services
+```
 
-1. **Использование latest тега**  
-   - Проблема: latest тег часто обновляется, может много весить и могут возникнуть конфликты зависимостей
-   - Исправление: использование конретного python:3.12-slim образа
+6. Дождемся готовности подов:
+```bash
+kubectl wait --for=condition=ready pod -l app=postgres --timeout=120s
+kubectl wait --for=condition=ready pod -l app=flask-app --timeout=120s
+```
 
-2. **Неэффективное использование слоев Docker**  
-   - Проблема: каждая команда RUN создает новый слой -> несколько команд RUN увеличивают размер образа
-   - Исправление: объединение команд в один RUN
+7. Получим доступ к приложению:
+```bash
+minikube service app-service
+```
 
-3. **Установка пакетов после копирования файлов проекта**  
-   - Проблема: если какой-то файл в проекте изменится, то докер будет устанавливать все зависимости из requirements.txt заново
-   - Исправление: Сначала копируем только файл requirements.txt и перемещаем команды по установке пакетов наверх
+## Особенности реализации
 
-4. **Копирование всей директории без .dockerignore**  
-   - Проблема: COPY . /app копирует все файлы из директории (включая мусор, если он есть)
-   - Исправление: копирование только нужных файлов и/или использование .dockerignore
+- **2 Deployment**: `postgres-deployment` и `app-deployment`
+- **Кастомный образ**: `app-deployment` использует образ`, собранный из Dockerfile
+- **Init-контейнер**: `app-deployment` содержит init-контейнер для инициализации БД
+- **Volumes**: 
+  - `postgres-deployment` использует PersistentVolumeClaim
+  - `app-deployment` использует emptyDir volume
+- **ConfigMap и Secret**: используются для конфигурации и секретов
+- **Пробы**: оба Deployment содержат liveness и readiness пробы
 
-5. **Нет очистки кэша пакетов**  
-   - Проблема: pip3 install оставляет кэш, увеличивая размер образа
-   - Исправление: pip install --no-cache-dir предотвращает сохранение кэша
-
-6. **Запуск от root пользователя**  
-   - Проблема: приложение запускается с правами root, что является уязвимостью безопасности
-   - Исправление: создание отдельного пользователя с ограниченными правами
-
-7. **Пишем переменную окружения прям в докерфайле**
-   - Проблема: Пишем значение sensible переменной (апи ключ) внутри докерфайла
-   - Исправление: переносим в .env и не коммитим этот файл в репозиторий
-
-8. **Некорректное использование команды CMD**
-   - Проблема: Скрипт и аргументы к нему перечислены в одной команде CMD
-   - Исправление: Следуем [Best Practices](https://docs.docker.com/build/building/best-practices/#entrypoint) от Докера и делим на 2 команды - ENTRYPOINT для запуска скрипта и CMD для передачи аргументов
-
-
-## Когда не стоит использовать контейнеры
-
-1. **Слишком простой проект/просто скрипты**  
-   - добавляет накладные расходы по управлению docker-ом
-
-2. **Другая операционная система/ядро**  
-   - контейнеры Docker используют ядро хост-системы
