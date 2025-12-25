@@ -7,7 +7,7 @@ time.sleep(2)
 print("Start script")
 
 conn = psycopg2.connect(
-    host=os.environ['POSTGRES_HOST'],
+    host=os.environ['DB_HOST'],
     database=os.environ['POSTGRES_DB'],
     user=os.environ['POSTGRES_USER'],
     password=os.environ['POSTGRES_PASSWORD']
